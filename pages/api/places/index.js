@@ -5,21 +5,24 @@ export default async function handler(request, response) {
   await dbConnect();
 
   if (request.method === "GET") {
-    const places = await Place.find();
-    return response.status(200).json(places);
-  } else {
-    return response.status(405).json({ message: "Method not allowed" });
+    try {
+      const places = await Place.find();
+      response.status(200).json(places);
+      return;
+    } catch (error) {
+      response.status(405).json({ message: "Method not allowed" });
+      return;
+    }
   }
 
   if (request.method === "POST") {
     try {
-      const placeData = request.body;
-      await Place.create(placeData);
+      const newPlace = request.body;
+      await Place.create(newPlace);
 
       response.status(201).json({ status: "Place created" });
     } catch (error) {
-      console.log(error);
-      response.status(400).json({ error: error.message });
+      return response.status(400).json({ error: error.message });
     }
   }
 }
